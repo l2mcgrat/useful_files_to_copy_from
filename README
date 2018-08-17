@@ -1,0 +1,148 @@
+READ ME
+
+
+Directory Purpose 
+ 
+I often build files for certain purposes by copying from other files that have a similar function or purpose. An example of this
+is when I build a plotting file that (as you might guess) plots values, or a consolidater file that assembles all the desired values 
+from trajectories to perform post-simulation analysis. It's also helpful to copy example files for things like potential, integrator, 
+sim-start, energy extractor, etc because those files are easy to adapt but tricky (and inefficient) to build from scratch. 
+
+
+Importance of Information 
+
+A lot of what people do in life consists of assembling information in a way that is practical for the person in question. This could 
+be anything from gathering the well known physics/chemistry/economics equations and graphs such that you can quickly have a reminder 
+of the all the mathematical frameworks that are used to describe the universe we inhabit, to keeping track of all the code and README 
+files you've made by uploading them to your github account so that you don't have to worry about losing valueable work, to assembling
+pictures, audio and ones own ways of thinking to make a video essay on youtube. Either way, the ability to consolidate and modify 
+information to ones benefit is an incredibly important skill to master in this age of information we live in. 
+
+"The way you percieve, and express information is a huge part of what defines you."
+
+- Liam McGrath
+
+
+Simulation Principles  
+
+Simulations consist mostly setting up constitutive equations that describe how a system changes in space and evolves in time (which 
+is such a general statement). To be more specific, take an example of a purely classical system which evolves via classical equations 
+of motion (for each atom or particle i, in a system of N atoms or particles);
+
+     v = dx / dt       ,     F = dp / dt = m ( dv / dt ) = - ( grad U )
+
+These equations of motion give us ways of updating position and momentum following a certain time step dt.   
+
+     dx_i = v_i dt     ,     dv_i = ( dt / m ) ( - grad U_i )  
+
+     x_i^{n+1} = x_i^{n} + v_i^{n} dt     ,     v_i^{n+1} = v_i^{n} + ( dt / m ) ( - grad U_i )    
+
+This system has certain properties such as temperature and pressure which depend on the position and momenta of N atoms or particles;
+
+     ( f / 2 ) m ( < v > )^2  = ( 3 / 2 ) N k_B T     ,     P = n R T / V 
+
+If the system has electric or magnetic dipoles then, it may be worthwhile to assess the systems orientation over time, which could
+tell you something about the phase change of the system (either magetic fields are aligned or disordered).
+
+Either way, the important concept to illustrate is that simulations are created by coding mathematical principles, and the position
+and momentum values over different time steps can be stored in a trajectory, along with values such as kinetic and potential energy;
+
+     K( p(t) , t ) = < p(t) >^2 / 2 m     ,     U( x_i(t) , t ) = < ( q_i / 4 pi epsilon_0 x(t) ) >     ,
+
+which are quantities that are typically calculated as averages of observable quantities. 
+
+All of these properties can be saved in a trajectory and later analyzed using analysis stripts, which one can use to come to useful 
+conclusions about a system such as at what temperature or pressure a phase transition occurs. You can even make nice plots that 
+display the potential energy of a system with respect to distance or time or whatever your heart desires. 
+
+All and all you've effectively used simulation principles to understand some system better than you would have by just observing its
+governing equations, but before you can practically use any of this information you require the software tools that makes this possible.
+
+
+Software Tools 
+
+Analyzers  Compilers  Forcefields  Initializers  Integrators  Plotters  Submitters
+
+These are named somewhat specifically for my simulations performed using principles from PIMC. Initializers basically construct
+a trajectory, import some potential(s), then call on an integrator to simulate the dynamics of a system as it tends towards equilibrium. 
+They are essentially what is required to press the 'start button' and run a simulation. Integrators are jargon for the types simulations.
+Forcefields are files that call on potential files to calculate the potential ( U ( x ) ) for a given configuration of atoms and molecules.
+Compilers convert files from human recognizable c++ and python code to .so file type machine code which runs much faster than python cause
+its lower level than python. Thats it for the essentials for running simulations. I will list the contents of these directories and give
+quick descriptions of their purpose, but first we must go over the tools needed to effectively study simulations (aka time evolutions of 
+systems governed by consitutive equations).
+
+Submitters allow you to submit multiple jobs (or start multiple simulations) at once with slightly different input arguments. This is 
+very useful for studying how the kinetic and potential energies or orientation ordering parameters of simulations change with respect 
+to changes in temperature or number of bead (beads, commonly represented using P, is a PIMC thing. Just know P = 1 describes a classical 
+system and P --> infinity describes a quantum system). Noticing a change in these properties usually signifies a phase change in the 
+system. You can straight up one by one just look at the outputs of a system like the energies or orientation ordering parameters and 
+try to find the moment when the values change drastically, but plotting these values using Plotters is much more practical. I have a 
+submitter file for plotting multiple files (probably using plotenergiesvslatticespacing.py) with a similar format (named Plotter), and
+another submitter file for extracting the average potential and kinetic energies from the outputted trajectories from simulations, that 
+also consolidates the values into a file based on temperature, number of molecules and bead number. test-pimd-energy_analysis.py is the 
+submitter file that the analyzer script calls to extract these energies. Now time to list off these directories and their files;   
+
+Analyzers;
+
+test-pimd-energy_analysis.py  			   --> Used to extract energies from trajectories 
+
+Compilers;
+
+setup_HarmonicWell.py                              --> Compiler for MMTK_HarmonicWell.c
+setup_electricfield.py   			   --> Compiler for MMTK_electricfield.c
+setup_dipole.py  				   --> Compiler for MMTK_dipole.c	 
+setup_NoPot.p 					   --> Compiler for MMTK_NoPot.c
+setup_RotOnly_PINormalModeIntegrator.py            --> Compiler for RotOnly_PINormalModeIntegrator.pyx
+setup_H20Rigid3DRotor_PINormalModeIntegrator.py    --> Compiler for H20Rigid3DRotor_PINormalModeIntegrator.pyx
+
+Forcefields;
+
+LJFF.py	       
+MMTK_LJ.c					   --> Everything necessary to call on a Leonard Jones Potential	
+MMTK_LJ.so	
+HarmonicWellFF.py  
+MMTK_HarmonicWell.c   				   --> Everything necessary to call on a Harmonic Well ( 1/2 k x^2 ) Potential
+MMTK_HarmonicWell.so  
+electricfieldFF.py  
+MMTK_electricfield.c    			   --> Everything necessary to call on a dipole-electric field interaction potential
+MMTK_electricfield.so  
+dipoleFF.py	    
+MMTK_dipole.c     				   --> Everything necessary to call on a dipole-dipole interaction potential
+MMTK_dipole.so  
+NoPotFF.py
+MMTK_NoPot.c     			           --> Everything necessary to call on a 0 potential
+MMTK_NoPot.so
+
+Initializers;
+
+ASimStart.py  					   --> Calls on RotOnly_PINormalModeIntegrator.pyx and uses MMTK_NoPot.c
+DSimStart.py					   --> Calls on RotOnly_PINormalModeIntegrator.pyx and uses MMTK_electricfield.c with Dominiant (strong) Efield
+FSimStart.py					   --> Calls on RotOnly_PINormalModeIntegrator.pyx and uses MMTK_dipole.c
+MSimStart.py					   --> Calls on RotOnly_PINormalModeIntegrator.pyx and uses MMTK_electricfield.c with Dominiant (moderate) Efield
+PolSimStart.py 					   --> Calls on RotOnly_PINormalModeIntegrator.pyx and used MBPol forcefield 
+
+Integrators;
+
+RotOnlyPINormalModeIntegrator.c			  
+RotOnlyPINormalModeIntegrator.pyx 		   --> For systems without translation (no dv_cm ) 
+RotOnlyPINormalModeIntegrator.so
+H20Rigid3DRotor_PINormalModeIntegrator.c	
+H20Rigid3DRotor_PINormalModeIntegrator.pyx         --> For systems with translation
+H20Rigid3DRotor_PINormalModeIntegrator.so
+
+Plotters;
+
+histograph.py 					   --> creates a histogram of orientations
+plotenergiesvslatticespacing.py  		   --> plots energies vs. lattice_spacing
+
+Submitters;
+
+submitterP2.py 					   --> Submits multiple simulations with different lattice spacing, temperature, rot step, etc for 2 beads
+submitterP4.py                                     --> Submits multiple simulations with different lattice spacing, temperature, rot step, etc for 4 beads
+submitterP6.py                                     --> Submits multiple simulations with different lattice spacing, temperature, rot step, etc for 6 beads
+submitterP8.py                                     --> Submits multiple simulations with different lattice spacing, temperature, rot step, etc for 8 beads
+submitterP10.py                                    --> Submits multiple simulations with different lattice spacing, temperature, rot step, etc for 10 beads
+analyzer.py 					   --> analyzes multiple trajectories using test-pimd-energy_analysis.pym then consolidates the values in a file
+Plotter.py 					   --> creates multiple png files given energy files as inputs using the plotenergiesvslatticespacing.py file 
+
